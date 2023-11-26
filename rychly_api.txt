@@ -1,0 +1,117 @@
+// 0) README
+
+// THIS IS A COPY FROM GOOGLE APPS SCRIPT ADDON IN GOOGLE TABS WHICH WAS USED BY OUR COMPANY (CREATED IN chatGPT BY ME) IN ORDER TO IMPORT APIs FROM THE SALES FORM WEBSITE WE USE.
+
+// THIS IS WRITTEN AS A TUTORIAL FOR NON-PROGRAMMING PEOPLE IN THE COMPANY SO THEY CAN EDIT IT WHEN I LEAVE
+
+// Hello, you've entered into a Google Apps Script created by David Rychly on 19.11.2023 in cooperation with chatGPT. Here's the code used to import APIs from Simpleshop. It involves a REST API method, and you can find more information here: /URL/.
+The code essentially pulls the API from Simpleshop and inserts it into the current Google spreadsheet within the Script list. The 'Final' sheet then retrieves information from the Script list according to our specific needs.
+
+// ADDITIONAL USEFUL INFORMATION:
+It's crucial to note that this script is bound to a specific table -> Google Apps Scripts work this way. Hence, I always access it through the extension from the table and make modifications here. Table definitions are written as "getActiveSpreadsheet," etc., referring to the specific table where I'm modifying this script.
+Therefore, when I modify something in the code, it only changes for one table. I need to modify the template and then duplicate it to create order tables.
+
+// IF YOU'RE UNSURE, TRY CONSULTING GPT FIRST (without providing specific sensitive data), THEN WRITE TO ME AND ASK. :)
+
+//-----------------------------------------------------------------------------------------------------------------------
+// 1) TRIGGER MECHANISM - REFRESH WHEN CELL A1 IN THE FINAL SHEET IS EDITED
+// UPON EXECUTION, THE getDataFromAPI FUNCTION WILL BE TRIGGERED"
+
+function onEdit(e) {
+  // Define the spreadsheet - active spreadsheet and its sheet named "Final"
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Final");
+  
+  // Get the edited range - no changes made
+  var editedRange = e.range;
+  
+  // Check if cell A1 is in the specified sheet.
+  if (sheet.getName() === "Final" && editedRange.getA1Notation() === "A1") {
+    // IF Function: If cell A1 in the specified sheet is edited, trigger the getDataFromAPI function
+    getDataFromAPI();
+  }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// 2) getDataFromAPI FUNCTION
+
+function getDataFromAPI() {
+  // Define the table where you have the product number stored
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Final");
+
+  // Define the cell where you have the product number stored
+  var productNumberCell = sheet.getRange("A2"); // Modify the cell reference as needed.
+
+  // Retrieve the product number from the defined table and cell
+  var productNumber = productNumberCell.getValue();
+
+  // Define the API endpoint - URL address from Simpleshop with the productNumber variable added at the end (data type should be a number) - this allows us to change the product number in the Google spreadsheet and not here.
+  var url = "https://api.simpleshop.cz/2.0/export/who-bought/product/" + productNumber;
+
+  // Define basic authentication - username and password to access the API, if you need to change them.
+  var username = "/LOGIN/";
+  var password = "/PASSWORD/";
+  
+  // Encode login details using base64 encoding
+  var base64Credentials = Utilities.base64Encode(username + ":" + password);
+
+  // Create headers with authentication
+  var headers = {
+    "Authorization": "Basic " + base64Credentials
+  };
+  
+  // Set options for the HTTP request
+  var options = {
+    "method": "get",
+    "headers": headers
+  };
+  
+  // Make a request to the API
+  var response = UrlFetchApp.fetch(url, options);
+  
+  // Check if the API request was successful; if yes, execute the following commands, if not, an error message will be logged at the bottom.
+  if (response.getResponseCode() == 200) {
+    // Parse the JSON response
+    var jsonResponse = JSON.parse(response.getContentText());
+    
+    // Extract CSV (comma-separated values) data from the JSON response
+    var csvData = jsonResponse.csv;
+    
+    // Split CSV data into a matrix of rows
+    var csvRows = csvData.split('\n');
+    
+    // csvRows variable contains the matrix of CSV rows and can be continued with further operations
+    
+    // Specify the target sheet where you want to insert the data -> Current spreadsheet and in our case, the Script list
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Script");
+
+    // Clear previous data in the target list -> VERY IMPORTANT TO PREVENT ORDERS FROM PREVIOUS ACTIONS REMAINING AT THE BOTTOM ROWS
+    sheet.clear();
+    
+    // Write data to the list
+    var numRows = csvRows.length;
+    var numColumns = csvRows[0].split(';').length;
+    
+    // Transform CSV data (currently in rows format) into a 2D array format
+    var csvDataArray = csvRows.map(function(row) {
+      var rowArray = row.split(';');
+      
+      // Ensure column numbers match the target sheet
+      while (rowArray.length < numColumns) {
+        rowArray.push(''); // Add empty values to match the column count
+      }
+      
+      // Remove any extra columns if present
+      if (rowArray.length > numColumns) {
+        rowArray.splice(numColumns);
+      }
+      
+      return rowArray;
+    });
+    // Error message the sheet outputs when it fails to retrieve the API
+    sheet.getRange(1, 1, numRows, numColumns).setValues(csvDataArray);
+  } else {
+    Logger.log("API request failed with status code: " + response.getResponseCode());
+  }
+}
+
+// Well, if something arises, try to dissect the code in GPT first and then write to me if needed.
