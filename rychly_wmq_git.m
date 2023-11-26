@@ -1,5 +1,13 @@
 clc, clearvars
 % WMQ PROJECT EXAM - David Rychly january 2023
+TASK:
+Temperature-activated reorientation of magnetic nanoparticle spins (implementation in Matlab)
+Single-domain magnetic nanoparticles consist of atoms with aligned magnetic moments. For the study of their magnetic behavior, such particles are considered as indivisible large particles with spin orientation that can be either "up" or "down". Let the total energy of such a particle be given by the relation:
+E = -A sin^2(θ) - H * θ, (1)
+where A > 0, θ is the spin orientation, and H is the magnetic field. For zero magnetic field (H = 0), this function has two equivalent minima where θ = -π/2 corresponds to the "down" spin and θ = +π/2 corresponds to the "up" spin. The only maximum corresponds to θ = 0 (i.e., the "down" spin). When there is a non-zero magnetic field, flipping the spin from state "up" to state "down" (and vice versa) requires overcoming an energy barrier, which depends on the magnitude of the magnetic field H and the direction of flipping! Plot the above function for H = 0 and H/A = 0.3 (for simplicity, consider A = 1). How large is the energy barrier for flipping the spin from state "up" to "down" and from "down" to state "up" in the opposite direction?
+The time change of the probability Pup that the particle spin is "up" is determined by the following equation:
+dPup/dt = (1 - Pup) * vup to down - Pup * vdown to up,
+where v a -> b represents the transition rates between states a and b, t is time, and these transitions are either from "up" to "down" or from "down" to "up". The equation includes the condition that Pup + Pdown = 1. Write a program in Matlab that simulates the time evolution of Pup using the discretized equation for given values of H/A and absolute temperature T. After discretization, γ0 * t will indicate the "mobility," as discussed in lectures. Study the time evolution of Pup for the given initial condition Pdown = 0.5 (i.e., 50% probability that the particle spin is "down"), H/A = {0, 0.3}, and two temperatures kBT = {A, 3A}. This involves 6 computations, each ending at the same total time tmax. Comment on your observations.
 tic
 %-------------------------------------------------------------------------------------------------------------
 % 1) Energy total, energy barriers for changing the spin
