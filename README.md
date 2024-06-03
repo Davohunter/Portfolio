@@ -1,4 +1,4 @@
-Hi, my name is David Rychly, currently being Intern at Continero and developing library for connecting OpenAI with RobotFramework for software testing, finishing my studies at Brno University of technology in the field of Material sciences and pursuing goal of starting a career in IT!
+Hi, my name is David Rychly, currently being Intern at Continero and developing library for connecting OpenAI with RobotFramework for software testing, finishing my studies at Brno University of technology in the field of Material sciences and pursuing goal of career in IT!
 
 This is Portfolio of my projects, currently including:
   1) Dungeons and Dragons console app using OpenAI API for input - PYTHON
